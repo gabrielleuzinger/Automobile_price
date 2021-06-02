@@ -1,4 +1,4 @@
-# Analysing the Monthly Sunspot Dataset from Machine Learning Mastery
+# Analysing the 'Automobile Data Set' from the UC Irvine Machine Learning repository
 
 This notebook is used to analyze the 'Automobile Data Set' from the UC Irvine Machine Learning repository. The dataset is available [here](https://archive.ics.uci.edu/ml/datasets/Automobile). **The objective is to create a model to predict car prices base on its attributes**.
 
