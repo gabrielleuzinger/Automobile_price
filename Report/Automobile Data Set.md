@@ -21,140 +21,19 @@ The notebook is divided as follows:
 
 In this section, we explore the characteristics of the dataset, including its dimensions and characteristics of its variables.
 
-The dataset contains only two columns and 36 lines.
-The first column of the dataset contains strings denoting the month number and the second column cotains integers denoting the number of passengers for that month.
+The dataset contains only two columns and 36 lines. The attributes for each column are upload from the website.
 
-After importing the data, we need to do some data cleaning. For now, we just substitute the "?" values by NaN, and make a few adjustements to the categorical variables, which will not significantly impact our model, but are necessary for it to function.
+After importing the data, we need to do some data cleaning. For now, we just substitute the "?" values by NaN, and make a few adjustements to the categorical variables, which will not significantly impact our model, but are necessary for it to function. We will remove the auto maker 'Mercury' because it appear only once in the whole data set, and this compromise the model we will develop. We also transform some numerical columns that were objects to float. Finally, we drop all the rows without a price for the car, as they do not help us train our model.
 
 
 ```python
 import pandas as pd
 import numpy as np
-!pip install -U scikit-learn
 ```
-
-    Requirement already up-to-date: scikit-learn in /Users/leuzinger/opt/anaconda3/lib/python3.8/site-packages (0.24.2)
-    Requirement already satisfied, skipping upgrade: joblib>=0.11 in /Users/leuzinger/opt/anaconda3/lib/python3.8/site-packages (from scikit-learn) (0.17.0)
-    Requirement already satisfied, skipping upgrade: numpy>=1.13.3 in /Users/leuzinger/opt/anaconda3/lib/python3.8/site-packages (from scikit-learn) (1.19.2)
-    Requirement already satisfied, skipping upgrade: threadpoolctl>=2.0.0 in /Users/leuzinger/opt/anaconda3/lib/python3.8/site-packages (from scikit-learn) (2.1.0)
-    Requirement already satisfied, skipping upgrade: scipy>=0.19.1 in /Users/leuzinger/opt/anaconda3/lib/python3.8/site-packages (from scikit-learn) (1.5.2)
-
 
 ----------
 
 ### Getting the data
-
-
-```python
-with open("/Users/leuzinger/Dropbox/Data Science/Awari/Regressions/Automobile Data Set/imports-85.names") as f:
-    print(f.read())
-```
-
-    1. Title: 1985 Auto Imports Database
-    
-    2. Source Information:
-       -- Creator/Donor: Jeffrey C. Schlimmer (Jeffrey.Schlimmer@a.gp.cs.cmu.edu)
-       -- Date: 19 May 1987
-       -- Sources:
-         1) 1985 Model Import Car and Truck Specifications, 1985 Ward's
-            Automotive Yearbook.
-         2) Personal Auto Manuals, Insurance Services Office, 160 Water
-            Street, New York, NY 10038 
-         3) Insurance Collision Report, Insurance Institute for Highway
-            Safety, Watergate 600, Washington, DC 20037
-    
-    3. Past Usage:
-       -- Kibler,~D., Aha,~D.~W., \& Albert,~M. (1989).  Instance-based prediction
-          of real-valued attributes.  {\it Computational Intelligence}, {\it 5},
-          51--57.
-    	 -- Predicted price of car using all numeric and Boolean attributes
-    	 -- Method: an instance-based learning (IBL) algorithm derived from a
-    	    localized k-nearest neighbor algorithm.  Compared with a
-    	    linear regression prediction...so all instances
-    	    with missing attribute values were discarded.  This resulted with
-    	    a training set of 159 instances, which was also used as a test
-    	    set (minus the actual instance during testing).
-    	 -- Results: Percent Average Deviation Error of Prediction from Actual
-    	    -- 11.84% for the IBL algorithm
-    	    -- 14.12% for the resulting linear regression equation
-    
-    4. Relevant Information:
-       -- Description
-          This data set consists of three types of entities: (a) the
-          specification of an auto in terms of various characteristics, (b)
-          its assigned insurance risk rating, (c) its normalized losses in use
-          as compared to other cars.  The second rating corresponds to the
-          degree to which the auto is more risky than its price indicates.
-          Cars are initially assigned a risk factor symbol associated with its
-          price.   Then, if it is more risky (or less), this symbol is
-          adjusted by moving it up (or down) the scale.  Actuarians call this
-          process "symboling".  A value of +3 indicates that the auto is
-          risky, -3 that it is probably pretty safe.
-    
-          The third factor is the relative average loss payment per insured
-          vehicle year.  This value is normalized for all autos within a
-          particular size classification (two-door small, station wagons,
-          sports/speciality, etc...), and represents the average loss per car
-          per year.
-    
-       -- Note: Several of the attributes in the database could be used as a
-                "class" attribute.
-    
-    5. Number of Instances: 205
-    
-    6. Number of Attributes: 26 total
-       -- 15 continuous
-       -- 1 integer
-       -- 10 nominal
-    
-    7. Attribute Information:     
-         Attribute:                Attribute Range:
-         ------------------        -----------------------------------------------
-      1. symboling:                -3, -2, -1, 0, 1, 2, 3.
-      2. normalized-losses:        continuous from 65 to 256.
-      3. make:                     alfa-romero, audi, bmw, chevrolet, dodge, honda,
-                                   isuzu, jaguar, mazda, mercedes-benz, mercury,
-                                   mitsubishi, nissan, peugot, plymouth, porsche,
-                                   renault, saab, subaru, toyota, volkswagen, volvo
-      4. fuel-type:                diesel, gas.
-      5. aspiration:               std, turbo.
-      6. num-of-doors:             four, two.
-      7. body-style:               hardtop, wagon, sedan, hatchback, convertible.
-      8. drive-wheels:             4wd, fwd, rwd.
-      9. engine-location:          front, rear.
-     10. wheel-base:               continuous from 86.6 120.9.
-     11. length:                   continuous from 141.1 to 208.1.
-     12. width:                    continuous from 60.3 to 72.3.
-     13. height:                   continuous from 47.8 to 59.8.
-     14. curb-weight:              continuous from 1488 to 4066.
-     15. engine-type:              dohc, dohcv, l, ohc, ohcf, ohcv, rotor.
-     16. num-of-cylinders:         eight, five, four, six, three, twelve, two.
-     17. engine-size:              continuous from 61 to 326.
-     18. fuel-system:              1bbl, 2bbl, 4bbl, idi, mfi, mpfi, spdi, spfi.
-     19. bore:                     continuous from 2.54 to 3.94.
-     20. stroke:                   continuous from 2.07 to 4.17.
-     21. compression-ratio:        continuous from 7 to 23.
-     22. horsepower:               continuous from 48 to 288.
-     23. peak-rpm:                 continuous from 4150 to 6600.
-     24. city-mpg:                 continuous from 13 to 49.
-     25. highway-mpg:              continuous from 16 to 54.
-     26. price:                    continuous from 5118 to 45400.
-    
-    8. Missing Attribute Values: (denoted by "?")
-       Attribute #:   Number of instances missing a value:
-       2.             41
-       6.             2
-       19.            4
-       20.            4
-       22.            2
-       23.            2
-       26.            4
-    
-    
-    
-    
-    
-
 
 
 ```python
@@ -372,46 +251,6 @@ df_data.head()
 
 
 ```python
-df_data.info()
-```
-
-    <class 'pandas.core.frame.DataFrame'>
-    RangeIndex: 205 entries, 0 to 204
-    Data columns (total 26 columns):
-     #   Column             Non-Null Count  Dtype  
-    ---  ------             --------------  -----  
-     0   symboling          205 non-null    int64  
-     1   normalized_losses  205 non-null    object 
-     2   make               205 non-null    object 
-     3   fuel_type          205 non-null    object 
-     4   aspiration         205 non-null    object 
-     5   num_of_doors       205 non-null    object 
-     6   body_style         205 non-null    object 
-     7   drive_wheels       205 non-null    object 
-     8   engine_location    205 non-null    object 
-     9   wheel_base         205 non-null    float64
-     10  length             205 non-null    float64
-     11  width              205 non-null    float64
-     12  height             205 non-null    float64
-     13  curb_weight        205 non-null    int64  
-     14  engine_type        205 non-null    object 
-     15  num_of_cylinders   205 non-null    object 
-     16  engine_size        205 non-null    int64  
-     17  fuel_system        205 non-null    object 
-     18  bore               205 non-null    object 
-     19  stroke             205 non-null    object 
-     20  compression_ratio  205 non-null    float64
-     21  horsepower         205 non-null    object 
-     22  peak_rpm           205 non-null    object 
-     23  city_mpg           205 non-null    int64  
-     24  highway_mpg        205 non-null    int64  
-     25  price              205 non-null    object 
-    dtypes: float64(5), int64(5), object(16)
-    memory usage: 41.8+ KB
-
-
-
-```python
 df_data['num_of_doors'].replace("?","four",inplace=True)
 df_data.replace("?",np.nan,inplace=True)
 df_data.dropna(subset = ["price"], inplace=True)
@@ -490,7 +329,7 @@ plt.show()
 
 
     
-![png](output_15_0.png)
+![png](output_13_0.png)
     
 
 
@@ -527,28 +366,6 @@ corr_matrix['price'].sort_values(ascending=False)
 ```python
 import seaborn as sns
 
-plt.figure(figsize=(16, 30))
-sns.set_context("notebook", font_scale=1.7)
-sns.pairplot(df_data.drop(columns=['symboling','normalized_losses','make','fuel_type','aspiration','num_of_doors','body_style',
-           'drive_wheels','engine_location','height','engine_type','wheel_base','bore',
-           'num_of_cylinders','fuel_system','stroke','compression_ratio',
-           'peak_rpm']))
-
-plt.show()
-```
-
-
-    <Figure size 1152x2160 with 0 Axes>
-
-
-
-    
-![png](output_17_1.png)
-    
-
-
-
-```python
 plt.figure(figsize=(20, 30))
 sns.set_theme()
 sns.set_context("notebook", font_scale=1.5)
@@ -558,7 +375,7 @@ plt.show()
 
 
     
-![png](output_18_0.png)
+![png](output_15_0.png)
     
 
 
@@ -596,7 +413,7 @@ df_data.drop(columns=num_cols).nunique()
 ```python
 from sklearn.model_selection import StratifiedShuffleSplit
 
-split = StratifiedShuffleSplit(n_splits=1, test_size=0.2, random_state = 42)
+split = StratifiedShuffleSplit(n_splits=1, test_size=0.2)
 
 for train_index, test_index in split.split(df_data,df_data['make']):
     train_set = df_data.loc[train_index]
@@ -613,23 +430,23 @@ test_set['make'].value_counts()/len(test_set)
 
     toyota           0.150
     nissan           0.100
-    honda            0.075
     mitsubishi       0.075
     mazda            0.075
-    bmw              0.050
-    peugot           0.050
-    subaru           0.050
-    mercedes-benz    0.050
-    volkswagen       0.050
-    volvo            0.050
+    honda            0.075
     dodge            0.050
-    alfa-romero      0.025
+    peugot           0.050
+    mercedes-benz    0.050
+    bmw              0.050
+    volvo            0.050
+    volkswagen       0.050
+    subaru           0.050
     audi             0.025
-    jaguar           0.025
-    chevrolet        0.025
-    plymouth         0.025
     saab             0.025
+    plymouth         0.025
+    chevrolet        0.025
     porsche          0.025
+    jaguar           0.025
+    alfa-romero      0.025
     Name: make, dtype: float64
 
 
@@ -645,8 +462,8 @@ df_data['make'].value_counts()/len(df_data)
     toyota           0.160
     nissan           0.090
     mazda            0.085
-    mitsubishi       0.065
     honda            0.065
+    mitsubishi       0.065
     subaru           0.060
     volkswagen       0.060
     peugot           0.055
@@ -658,9 +475,9 @@ df_data['make'].value_counts()/len(df_data)
     audi             0.030
     saab             0.030
     porsche          0.020
-    chevrolet        0.015
-    jaguar           0.015
     alfa-romero      0.015
+    jaguar           0.015
+    chevrolet        0.015
     renault          0.010
     isuzu            0.010
     Name: make, dtype: float64
@@ -694,8 +511,6 @@ Third, we need to put all the attributes in the same scale because "Machine Lear
 
 ```python
 from sklearn.impute import SimpleImputer
-
-df_car.replace("?",np.nan,inplace=True)
 
 imputer_num = SimpleImputer(strategy='median')
 
@@ -752,317 +567,94 @@ df_car_tr.head()
   </thead>
   <tbody>
     <tr>
-      <th>51</th>
-      <td>1.0</td>
-      <td>113.0</td>
-      <td>93.1</td>
-      <td>166.8</td>
-      <td>64.2</td>
-      <td>54.1</td>
-      <td>1950.0</td>
-      <td>91.0</td>
-      <td>3.08</td>
-      <td>3.15</td>
-      <td>9.0</td>
-      <td>68.0</td>
-      <td>5000.0</td>
-      <td>31.0</td>
-      <td>38.0</td>
-    </tr>
-    <tr>
-      <th>42</th>
+      <th>106</th>
       <td>0.0</td>
-      <td>116.5</td>
-      <td>94.3</td>
-      <td>170.7</td>
-      <td>61.8</td>
-      <td>53.5</td>
-      <td>2337.0</td>
-      <td>111.0</td>
-      <td>3.31</td>
-      <td>3.23</td>
-      <td>8.5</td>
-      <td>78.0</td>
-      <td>4800.0</td>
-      <td>24.0</td>
-      <td>29.0</td>
+      <td>113.0</td>
+      <td>114.2</td>
+      <td>198.9</td>
+      <td>68.4</td>
+      <td>58.7</td>
+      <td>3430.0</td>
+      <td>152.0</td>
+      <td>3.70</td>
+      <td>3.52</td>
+      <td>21.0</td>
+      <td>95.0</td>
+      <td>4150.0</td>
+      <td>25.0</td>
+      <td>25.0</td>
     </tr>
     <tr>
-      <th>32</th>
-      <td>1.0</td>
-      <td>101.0</td>
-      <td>93.7</td>
-      <td>150.0</td>
-      <td>64.0</td>
-      <td>52.6</td>
-      <td>1940.0</td>
-      <td>92.0</td>
-      <td>2.91</td>
-      <td>3.41</td>
-      <td>9.2</td>
-      <td>76.0</td>
-      <td>6000.0</td>
-      <td>30.0</td>
-      <td>34.0</td>
-    </tr>
-    <tr>
-      <th>91</th>
-      <td>1.0</td>
-      <td>128.0</td>
-      <td>94.5</td>
-      <td>165.6</td>
-      <td>63.8</td>
-      <td>53.3</td>
-      <td>2028.0</td>
+      <th>103</th>
+      <td>0.0</td>
+      <td>161.0</td>
+      <td>107.9</td>
+      <td>186.7</td>
+      <td>68.4</td>
+      <td>56.7</td>
+      <td>3020.0</td>
+      <td>120.0</td>
+      <td>3.46</td>
+      <td>3.19</td>
+      <td>8.4</td>
       <td>97.0</td>
-      <td>3.15</td>
-      <td>3.29</td>
-      <td>9.4</td>
-      <td>69.0</td>
-      <td>5200.0</td>
-      <td>31.0</td>
-      <td>37.0</td>
-    </tr>
-    <tr>
-      <th>120</th>
-      <td>3.0</td>
-      <td>116.5</td>
-      <td>95.9</td>
-      <td>173.2</td>
-      <td>66.3</td>
-      <td>50.2</td>
-      <td>2818.0</td>
-      <td>156.0</td>
-      <td>3.59</td>
-      <td>3.86</td>
-      <td>7.0</td>
-      <td>145.0</td>
       <td>5000.0</td>
       <td>19.0</td>
       <td>24.0</td>
     </tr>
-  </tbody>
-</table>
-</div>
-
-
-
-
-```python
-df_car_tr.info()
-```
-
-    <class 'pandas.core.frame.DataFrame'>
-    Int64Index: 160 entries, 51 to 164
-    Data columns (total 15 columns):
-     #   Column             Non-Null Count  Dtype  
-    ---  ------             --------------  -----  
-     0   symboling          160 non-null    float64
-     1   normalized_losses  160 non-null    float64
-     2   wheel_base         160 non-null    float64
-     3   length             160 non-null    float64
-     4   width              160 non-null    float64
-     5   height             160 non-null    float64
-     6   curb_weight        160 non-null    float64
-     7   engine_size        160 non-null    float64
-     8   bore               160 non-null    float64
-     9   stroke             160 non-null    float64
-     10  compression_ratio  160 non-null    float64
-     11  horsepower         160 non-null    float64
-     12  peak_rpm           160 non-null    float64
-     13  city_mpg           160 non-null    float64
-     14  highway_mpg        160 non-null    float64
-    dtypes: float64(15)
-    memory usage: 20.0 KB
-
-
-
-```python
-df_car_tr.describe()
-```
-
-
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>symboling</th>
-      <th>normalized_losses</th>
-      <th>wheel_base</th>
-      <th>length</th>
-      <th>width</th>
-      <th>height</th>
-      <th>curb_weight</th>
-      <th>engine_size</th>
-      <th>bore</th>
-      <th>stroke</th>
-      <th>compression_ratio</th>
-      <th>horsepower</th>
-      <th>peak_rpm</th>
-      <th>city_mpg</th>
-      <th>highway_mpg</th>
-    </tr>
-  </thead>
-  <tbody>
     <tr>
-      <th>count</th>
-      <td>160.000000</td>
-      <td>160.000000</td>
-      <td>160.000000</td>
-      <td>160.00000</td>
-      <td>160.000000</td>
-      <td>160.000000</td>
-      <td>160.000000</td>
-      <td>160.00000</td>
-      <td>160.000000</td>
-      <td>160.000000</td>
-      <td>160.000000</td>
-      <td>160.000000</td>
-      <td>160.000000</td>
-      <td>160.000000</td>
-      <td>160.000000</td>
+      <th>162</th>
+      <td>2.0</td>
+      <td>134.0</td>
+      <td>98.4</td>
+      <td>176.2</td>
+      <td>65.6</td>
+      <td>52.0</td>
+      <td>2540.0</td>
+      <td>146.0</td>
+      <td>3.62</td>
+      <td>3.50</td>
+      <td>9.3</td>
+      <td>116.0</td>
+      <td>4800.0</td>
+      <td>24.0</td>
+      <td>30.0</td>
     </tr>
     <tr>
-      <th>mean</th>
-      <td>0.831250</td>
-      <td>120.643750</td>
-      <td>98.754375</td>
-      <td>174.14000</td>
-      <td>65.865625</td>
-      <td>53.721875</td>
-      <td>2543.043750</td>
-      <td>126.31250</td>
-      <td>3.331562</td>
-      <td>3.262687</td>
-      <td>10.336938</td>
-      <td>102.581250</td>
-      <td>5119.375000</td>
-      <td>25.468750</td>
-      <td>31.018750</td>
+      <th>159</th>
+      <td>1.0</td>
+      <td>168.0</td>
+      <td>94.5</td>
+      <td>168.7</td>
+      <td>64.0</td>
+      <td>52.6</td>
+      <td>2204.0</td>
+      <td>98.0</td>
+      <td>3.19</td>
+      <td>3.03</td>
+      <td>9.0</td>
+      <td>70.0</td>
+      <td>4800.0</td>
+      <td>29.0</td>
+      <td>34.0</td>
     </tr>
     <tr>
-      <th>std</th>
-      <td>1.274924</td>
-      <td>31.940116</td>
-      <td>5.952208</td>
-      <td>12.14687</td>
-      <td>2.085712</td>
-      <td>2.384111</td>
-      <td>502.515651</td>
-      <td>39.79447</td>
-      <td>0.268470</td>
-      <td>0.326948</td>
-      <td>4.216883</td>
-      <td>37.230621</td>
-      <td>495.831285</td>
-      <td>6.495206</td>
-      <td>6.838176</td>
-    </tr>
-    <tr>
-      <th>min</th>
-      <td>-2.000000</td>
-      <td>65.000000</td>
-      <td>86.600000</td>
-      <td>141.10000</td>
-      <td>60.300000</td>
-      <td>47.800000</td>
-      <td>1488.000000</td>
-      <td>61.00000</td>
-      <td>2.540000</td>
-      <td>2.070000</td>
-      <td>7.000000</td>
-      <td>48.000000</td>
-      <td>4150.000000</td>
-      <td>13.000000</td>
-      <td>16.000000</td>
-    </tr>
-    <tr>
-      <th>25%</th>
-      <td>0.000000</td>
-      <td>101.000000</td>
-      <td>94.500000</td>
-      <td>166.67500</td>
-      <td>64.200000</td>
-      <td>52.000000</td>
-      <td>2190.750000</td>
-      <td>98.00000</td>
-      <td>3.150000</td>
-      <td>3.140000</td>
-      <td>8.600000</td>
-      <td>71.500000</td>
-      <td>4800.000000</td>
-      <td>20.000000</td>
-      <td>25.000000</td>
-    </tr>
-    <tr>
-      <th>50%</th>
-      <td>1.000000</td>
-      <td>116.500000</td>
-      <td>97.000000</td>
-      <td>173.20000</td>
-      <td>65.500000</td>
-      <td>54.000000</td>
-      <td>2412.000000</td>
-      <td>120.00000</td>
-      <td>3.310000</td>
-      <td>3.350000</td>
-      <td>9.000000</td>
-      <td>95.000000</td>
-      <td>5200.000000</td>
-      <td>25.000000</td>
-      <td>30.000000</td>
-    </tr>
-    <tr>
-      <th>75%</th>
-      <td>2.000000</td>
-      <td>134.000000</td>
-      <td>102.100000</td>
-      <td>181.55000</td>
-      <td>66.500000</td>
-      <td>55.500000</td>
-      <td>2863.250000</td>
-      <td>142.00000</td>
-      <td>3.590000</td>
-      <td>3.422500</td>
-      <td>9.400000</td>
-      <td>116.000000</td>
-      <td>5500.000000</td>
-      <td>30.000000</td>
-      <td>34.000000</td>
-    </tr>
-    <tr>
-      <th>max</th>
-      <td>3.000000</td>
-      <td>256.000000</td>
-      <td>115.600000</td>
-      <td>202.60000</td>
-      <td>72.000000</td>
-      <td>59.800000</td>
-      <td>4066.000000</td>
-      <td>326.00000</td>
-      <td>3.800000</td>
-      <td>4.170000</td>
-      <td>23.000000</td>
-      <td>262.000000</td>
-      <td>6600.000000</td>
-      <td>49.000000</td>
-      <td>54.000000</td>
+      <th>102</th>
+      <td>1.0</td>
+      <td>231.0</td>
+      <td>99.2</td>
+      <td>178.5</td>
+      <td>67.9</td>
+      <td>49.7</td>
+      <td>3139.0</td>
+      <td>181.0</td>
+      <td>3.43</td>
+      <td>3.27</td>
+      <td>9.0</td>
+      <td>160.0</td>
+      <td>5200.0</td>
+      <td>19.0</td>
+      <td>25.0</td>
     </tr>
   </tbody>
 </table>
@@ -1088,10 +680,10 @@ df_data_cat_1hot.toarray()
 
 
     array([[0., 0., 0., ..., 0., 0., 0.],
-           [0., 0., 0., ..., 0., 0., 0.],
-           [0., 0., 0., ..., 0., 0., 0.],
+           [0., 0., 0., ..., 1., 0., 0.],
+           [0., 0., 0., ..., 1., 0., 0.],
            ...,
-           [0., 1., 0., ..., 1., 0., 0.],
+           [0., 0., 0., ..., 0., 0., 0.],
            [0., 0., 0., ..., 0., 0., 0.],
            [0., 0., 0., ..., 1., 0., 0.]])
 
@@ -1114,9 +706,9 @@ df_car_num_tr[0]
 
 
 
-    array([ 0.13277636, -0.24006642, -0.95294515, -0.60616816, -0.80109555,
-            0.15910008, -1.18385516, -0.89015814, -0.93996463, -0.34574664,
-           -0.31803947, -0.93175522, -0.24151321,  0.85426342,  1.02412823])
+    array([-0.67207128, -0.19543054,  2.62816386,  2.04041863,  1.2131748 ,
+            2.02159893,  1.73042176,  0.64226992,  1.43247045,  0.85482115,
+            2.67023512, -0.20236124, -2.05696449, -0.03364055, -0.83004414])
 
 
 
@@ -1137,20 +729,20 @@ df_car_ML[0]
 
 
 
-    array([ 0.13277636, -0.24006642, -0.95294515, -0.60616816, -0.80109555,
-            0.15910008, -1.18385516, -0.89015814, -0.93996463, -0.34574664,
-           -0.31803947, -0.93175522, -0.24151321,  0.85426342,  1.02412823,
-            0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
-            0.        ,  0.        ,  0.        ,  1.        ,  0.        ,
+    array([-0.67207128, -0.19543054,  2.62816386,  2.04041863,  1.2131748 ,
+            2.02159893,  1.73042176,  0.64226992,  1.43247045,  0.85482115,
+            2.67023512, -0.20236124, -2.05696449, -0.03364055, -0.83004414,
             0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
             0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
-            0.        ,  0.        ,  1.        ,  1.        ,  0.        ,
+            0.        ,  0.        ,  1.        ,  0.        ,  0.        ,
+            0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+            0.        ,  1.        ,  0.        ,  0.        ,  1.        ,
             1.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+            0.        ,  1.        ,  0.        ,  0.        ,  1.        ,
             1.        ,  0.        ,  0.        ,  1.        ,  0.        ,
-            1.        ,  0.        ,  0.        ,  0.        ,  1.        ,
             0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
             1.        ,  0.        ,  0.        ,  0.        ,  0.        ,
-            0.        ,  1.        ,  0.        ,  0.        ,  0.        ,
+            0.        ,  0.        ,  0.        ,  1.        ,  0.        ,
             0.        ,  0.        ,  0.        ])
 
 
@@ -1163,7 +755,7 @@ After preparing the data set, we are ready to select and train our ML model to p
 
 We start with Linear Regression (LR) model. "A regression model, such as linear regression, models an output value based on a linear combination of input values" [(Brownlee, 2020)](https://machinelearningmastery.com/introduction-to-time-series-forecasting-with-python/).
 
-Our LR model have an RMSE of 1404.4, while the mean price of cars in the training set is 10093.5 and the median price is 13081.0. The car prices range between 5118 to 45400. Thus, we can assume that the model is reasanobly accurate. However, the large values for the intercept and the coefficients indicate that the model is overfitting to the data. 
+Our LR model have an RMSE of 1404.3, while the mean price of cars in the training set is 10221.5 and the median price is 13116.0. The car prices range between 5118 to 45400. Thus, we can assume that the model is reasanobly accurate. However, the large values for the intercept and the coefficients indicate that the model is overfitting to the data. 
 
 Therefore, we can try some regularized linear models. This kind of model constrain the weights of the model, avoiding overfitting (GÉRON, 2019). We try three regularized linear models:
 
@@ -1171,7 +763,7 @@ Therefore, we can try some regularized linear models. This kind of model constra
 2. Lasso regression
 3. Elastic Net
 
-As expected, these three models perform better than the LR model. **The best one is Ridge regression**, which have a mean score of 2639.8 and a standard deviation of 984.5 in the cross-validation. Therefore, we will use this method in the test set.
+As expected, these three models perform better than the LR model. **The best one is Ridge regression**, which have a mean score of 2497.1 and a standard deviation of 841.7 in the cross-validation. Therefore, we will use this method in the test set.
 
 
 ```python
@@ -1196,26 +788,26 @@ lin_reg.intercept_,lin_reg.coef_
 
 
 
-    (4626505370360773.0,
-     array([-6.30661789e+02, -3.20587715e+02,  2.65567858e+03, -2.21605796e+03,
-             6.25924870e+02, -1.60294558e+03,  3.38725374e+03,  4.84576099e+03,
-            -8.98362659e+02, -6.28162038e+02, -2.88271583e+03,  4.26647827e+02,
-             1.43882279e+03, -2.01346692e+02,  1.44934315e+03, -9.73306406e+14,
-            -9.73306406e+14, -9.73306406e+14, -9.73306406e+14, -9.73306406e+14,
-            -4.09701670e+14, -9.73306406e+14, -9.73306406e+14, -9.73306406e+14,
-            -9.73306406e+14, -9.73306406e+14, -9.73306406e+14, -8.30450097e+14,
-            -9.73306406e+14, -2.78436979e+15, -9.73306406e+14, -9.73306406e+14,
-            -7.27216030e+14, -9.73306406e+14, -9.73306406e+14, -9.73306406e+14,
-            -7.38223301e+14, -5.06527285e+14,  1.51074312e+14,  1.51074312e+14,
-             1.42750191e+14,  1.42750191e+14, -2.76942440e+14, -2.76942440e+14,
-            -2.76942440e+14, -2.76942440e+14, -2.76942440e+14, -2.41542883e+14,
-            -2.41542883e+14, -2.41542883e+14, -4.27988252e+14,  1.62916551e+15,
-            -7.02717035e+14, -8.45573344e+14, -7.02717035e+14, -9.48807410e+14,
-            -7.02717035e+14, -8.62679271e+14, -9.16569225e+14, -9.16569225e+14,
-            -9.16569225e+14, -9.16569225e+14, -7.73712916e+14, -9.16569225e+14,
-            -7.56606989e+14, -1.43834108e+15, -8.74736348e+14, -8.74736348e+14,
-            -6.43040332e+14, -8.74736348e+14, -8.74736348e+14, -8.74736348e+14,
-            -8.74736348e+14]))
+    (-1787769126119548.0,
+     array([-8.30943593e+02, -1.31910093e+02,  4.94619716e+02, -1.23248054e+03,
+             1.42903380e+03, -7.09238549e+02,  2.69540617e+03,  4.17400812e+03,
+            -1.47894652e+02, -7.25780301e+02, -3.84896122e+03, -8.33239641e+02,
+             1.12734843e+03,  2.05474399e+02,  6.07375433e+02,  3.72463627e+15,
+             3.72463627e+15,  3.72463627e+15,  3.72463627e+15,  3.72463627e+15,
+             3.72463627e+15,  3.72463627e+15,  3.72463627e+15,  3.72463627e+15,
+             3.72463627e+15,  3.72463627e+15,  3.72463627e+15, -4.28979717e+15,
+             3.72463627e+15,  3.72463627e+15,  3.72463627e+15,  3.72463627e+15,
+             2.77864011e+15,  3.72463627e+15,  3.72463627e+15,  3.72463627e+15,
+             4.34358456e+15,  5.76245986e+15, -2.66452304e+15, -2.66452304e+15,
+            -8.06753283e+15, -8.06753283e+15, -1.12903102e+16, -1.12903102e+16,
+            -1.12903102e+16, -1.12903102e+16, -1.12903102e+16,  5.49009272e+15,
+             5.49009272e+15,  5.49009272e+15, -2.02359094e+16, -2.11819056e+16,
+             1.29233479e+15,  9.30676823e+15,  1.29233479e+15,  2.23833095e+15,
+             1.29233479e+15,  6.22192641e+15,  2.27381520e+16,  2.27381520e+16,
+             2.27381520e+16,  2.27381520e+16,  1.47237185e+16,  2.27381520e+16,
+             1.78085603e+16,  5.03836906e+15,  5.03836906e+15,  5.03836906e+15,
+             6.45724437e+15,  5.03836906e+15,  5.03836906e+15,  5.03836906e+15,
+             5.03836906e+15]))
 
 
 
@@ -1241,15 +833,15 @@ def regression (estimator):
 regression(lin_reg)
 ```
 
-    1404.4146623237739
-    10093.5 13080.99375
+    1404.2742014337869
+    10221.5 13115.975
     
     Cross-Validation: 
-    Scores: [6.91265975e+15 2.17844530e+03 8.41239705e+15 2.81547114e+16
-     2.18532082e+03 7.16912468e+14 1.78593393e+15 1.85986645e+03
-     2.16134233e+03 3.08972190e+03] 
-    Mean:  4598261460922470.0 
-    Std:  8387517525209383.0
+    Scores: [4.06716112e+03 1.68398029e+03 4.61605678e+15 4.59229800e+15
+     2.95279495e+16 1.79000683e+03 1.48485924e+15 1.07518748e+16
+     2.60558457e+03 1.52779806e+16] 
+    Mean:  6625101890472992.0 
+    Std:  9091762985783686.0
 
 
 
@@ -1275,26 +867,26 @@ sgd_reg.intercept_,sgd_reg.coef_
 
 
 
-    (array([4054.7515219]),
-     array([ -129.45823883,  -553.98635734,  1283.29855529,  -764.1098824 ,
-              547.60720201,  -200.65284111,  2552.55796179,  3158.77908292,
-             -389.69997359,  -598.38629938,   451.3601552 ,  1276.79803539,
-             1032.27606425,  -392.1776938 ,  1205.99418546,   749.71554553,
-             1464.16758533,  5227.93786113,    87.2985134 , -1303.47562343,
-             -137.78479721,  -418.98603027,   794.17339224,   780.90983624,
-             3798.93766837, -1795.67298286,  -592.89302282,  -989.07245911,
-            -1406.62701351,  3711.18285927,  -875.10543628,   939.49811055,
-            -1714.20310621, -1845.06818119,  -911.89809464, -1508.28310263,
-             1402.1720078 ,  2652.5795141 ,  1098.56571653,  2956.18580537,
-             1994.18569033,  2060.56583158,  3874.87750365,   837.36084756,
-             -181.45067683,    97.93018236,  -573.96633485,  1300.47585234,
-             1246.19025371,  1508.08541585,   343.56866264,  3711.18285927,
-              353.06586807,   247.15241733,  1694.50820387,  1996.97975306,
-            -2087.30893777,  1850.35421734,  4012.94503413,  -593.75073077,
-            -1196.1287884 ,   695.01826646,  1236.22487644, -1949.9113533 ,
-             1850.35421734,  -137.78479721,  1112.1649944 ,  1245.78792331,
-             1402.1720078 ,  -545.81607958,  1165.70312978,  -354.04308833,
-              166.56743172]))
+    (array([4200.67182426]),
+     array([-2.84465126e+02, -2.42429476e+02,  3.11051963e+02, -4.63541775e+02,
+             1.15142089e+03, -1.05358866e+02,  2.17347750e+03,  3.20006874e+03,
+            -5.89213881e+01, -7.96895480e+02,  3.75915096e+02,  9.88607881e+02,
+             1.01781908e+03, -1.50837098e+00,  5.04976046e+02,  3.98531567e+02,
+             1.96901551e+03,  6.10563785e+03, -5.40677912e+02, -1.52180114e+03,
+             1.51058663e+01, -5.46472545e+02,  5.09718119e+02, -3.39584040e+02,
+             3.60507690e+03, -1.99840079e+03, -9.41239615e+02, -4.73361299e+02,
+            -1.80330425e+03,  3.91453221e+03, -9.21919902e+02,  1.12859921e+03,
+            -1.93654003e+03, -1.30483494e+03, -1.35202169e+02, -9.82206766e+02,
+             1.41812381e+03,  2.78254802e+03,  9.86562509e+02,  3.21410932e+03,
+             2.15470489e+03,  2.04596694e+03,  3.44735205e+03,  1.19461487e+03,
+             9.23845545e+01,  1.25860175e+02, -6.59539823e+02,  1.56753131e+03,
+             1.07417231e+03,  1.55896821e+03,  2.19051529e+02,  3.98162030e+03,
+             1.43138865e+02,  9.87077655e+02,  2.22615141e+03,  2.04508027e+03,
+            -3.26659479e+03,  2.06581843e+03,  5.80517710e+03, -1.73117252e+03,
+            -1.91068789e+03,  1.90413843e+02,  1.46043895e+03, -1.67931609e+03,
+             2.06581843e+03, -7.49281200e+01,  1.61476442e+03,  6.13262181e+02,
+             1.41812381e+03, -6.59264226e+02,  1.25308843e+03, -3.57190455e+00,
+             3.91972328e+01]))
 
 
 
@@ -1303,14 +895,14 @@ sgd_reg.intercept_,sgd_reg.coef_
 regression(sgd_reg)
 ```
 
-    1688.0430744208766
-    10093.5 13080.99375
+    1584.37714080505
+    10221.5 13115.975
     
     Cross-Validation: 
-    Scores: [1788.44776525 1967.7560241  2194.06878669 4506.41779689 2483.50749434
-     3414.33382015 3674.70145884 1945.2438178  2742.18993892 4328.5942803 ] 
-    Mean:  2904.5261183276366 
-    Std:  959.1064589760781
+    Scores: [2516.92083109 1411.44492331 2262.78242843 1373.94350094 3680.7361167
+     2112.22558187 4038.37622484 3916.02886444 2205.27527972 3834.11670372] 
+    Mean:  2735.185045505901 
+    Std:  986.8824549638675
 
 
 
@@ -1336,26 +928,26 @@ ridge_reg.intercept_,ridge_reg.coef_
 
 
 
-    (18974.837935911564,
-     array([ -112.67034186,  -363.99248514,  1504.85421225,  -949.58078859,
-              626.21412284,  -483.16139607,  2438.84748572,  3116.29342662,
-             -249.62812433,  -695.49733664,  -467.78649658,  1053.2079532 ,
-             1015.82217063,  -442.20672435,  1288.26450901,  1183.79923904,
-             1713.41811638,  5176.16142598,  -795.99918411, -1921.84686146,
-             -498.93277588,  -441.74337629,   489.46390743,   475.13987793,
-             3066.51705085, -2195.54957414,  -674.69498204, -1456.29778716,
-            -1845.43283458,  2766.15426419,  -917.95054608,  1447.08151613,
-            -1978.38396108, -1802.8809041 ,  -590.07025909, -1197.95235192,
-              733.1048322 ,  -733.1048322 ,  -834.95040967,   834.95040967,
-              -67.08850879,    67.08850879,  2595.27231211,    -9.44979186,
-            -1026.00827559,  -575.77498953,  -984.03925514,   411.06221168,
-             -218.73665617,  -192.32555552, -2766.15426419,  2766.15426419,
-             -111.85173113,  -371.58160983,   827.66802062,   787.77030312,
-            -2431.33327204,  1299.32828925,  3546.68451718, -1564.4049961 ,
-            -2072.271552  ,  -163.79881464,  1084.71617733, -2130.25362103,
-             1299.32828925,  -498.93277588,   588.42770629,   255.94296369,
-              733.1048322 ,  -599.86761988,   299.78951068,  -794.12138699,
-               15.6567699 ]))
+    (18571.57428058036,
+     array([ -248.86380572,  -160.5494161 ,   326.88931345,  -525.51129508,
+             1331.90548093,   -66.01513373,  1739.09844212,  3267.44245831,
+              -76.73334579,  -796.69077045,  -429.54845079,   872.84344314,
+              914.90969257,   -73.18134526,   705.18747677,   420.70129926,
+             1785.52465178,  5432.19736632,  -512.73016588, -1618.18077041,
+              -46.41585383,  -741.26221337,   463.38996264,  -625.44731329,
+             2916.8962269 , -2089.65319435, -1176.41196637,  -959.51011272,
+            -1795.48188095,  2947.14732631,  -987.96729834,  1141.94890218,
+            -1877.90706919, -1475.88127992,  -180.13262177, -1020.82399499,
+              655.91989926,  -655.91989926,  -989.62439271,   989.62439271,
+              -37.94049858,    37.94049858,  2242.47151556,   285.43110737,
+             -804.21891201,  -492.89154791, -1230.792163  ,   240.83431923,
+             -471.30102447,   230.46670525, -2551.51772576,  2551.51772576,
+             -399.97926795,    73.63515716,  1325.63267413,   673.61065657,
+            -3152.6439998 ,  1479.74477989,  3876.93168714, -2121.31770187,
+            -2302.00979999,  -346.73001082,  1033.14526989, -1619.76422424,
+             1479.74477989,  -609.01414916,   862.24042829,  -229.4947304 ,
+              655.91989926,  -676.91123717,   482.41741026,  -544.87284166,
+               59.71522059]))
 
 
 
@@ -1364,14 +956,14 @@ ridge_reg.intercept_,ridge_reg.coef_
 regression(ridge_reg)
 ```
 
-    1603.0629065951002
-    10093.5 13080.99375
+    1554.3645935878496
+    10221.5 13115.975
     
     Cross-Validation: 
-    Scores: [1595.88505835 1857.35902304 1969.16291547 4752.18156545 2202.20636511
-     2869.52438566 3292.42890736 1615.84555543 2452.79756767 3790.63165453] 
-    Mean:  2639.80229980731 
-    Std:  984.4762236674517
+    Scores: [2408.71945769 1279.87889946 2048.49451044 1594.08224982 3395.95029521
+     1739.34117575 3756.9124819  2921.22175565 2177.46006517 3649.07422137] 
+    Mean:  2497.113511246872 
+    Std:  841.693388661098
 
 
 
@@ -1399,26 +991,26 @@ lasso_reg.intercept_,lasso_reg.coef_
 
 
 
-    (14550.072625396924,
-     array([-6.26001759e+02, -3.19348534e+02,  2.63605080e+03, -2.20379774e+03,
-             6.30437077e+02, -1.58207065e+03,  3.36785693e+03,  4.77267069e+03,
-            -8.60762701e+02, -6.30414314e+02, -2.70256734e+03,  4.75511240e+02,
-             1.43812193e+03, -2.03115572e+02,  1.44460512e+03,  3.78326326e+03,
-             5.36261678e+03,  8.45000759e+03, -4.15113947e+03, -3.97136740e+03,
-            -1.38266122e+03, -0.00000000e+00, -2.13316441e+02,  1.13303084e+03,
-             4.34815582e+03, -3.83354959e+03,  6.06007295e+01, -5.02381535e+02,
-            -3.35556218e+03,  1.36924507e+04, -5.95562005e+02,  5.42030906e+03,
-            -7.59293290e+02, -9.13924202e+02,  1.46402266e+03,  6.41227109e+01,
-             8.36557664e+03, -1.10501471e-09, -2.32302066e+03,  1.06527482e-11,
-            -3.06628614e+02,  0.00000000e+00,  2.91653117e+03, -0.00000000e+00,
-            -8.79515229e+02, -0.00000000e+00,  3.26339608e+02,  1.40254381e+03,
-             1.63127826e+02, -4.46098208e+02, -9.68221827e+02,  1.75719783e-12,
-            -0.00000000e+00, -1.62863457e+03,  3.68995271e+02,  0.00000000e+00,
-            -2.78869207e+03,  7.59959573e+03,  1.96224320e+03, -2.81257346e+03,
-             3.84070787e+01, -1.08766588e+03,  8.84394482e+03, -8.02234353e+03,
-             0.00000000e+00, -0.00000000e+00,  1.41432224e+03, -8.51425056e+02,
-             2.17697897e+02, -7.22206478e+02,  1.04330822e-01, -7.62015171e+02,
-             8.33733535e+02]))
+    (22696.63670672603,
+     array([-8.25829264e+02, -1.47929844e+02,  6.06440575e+02, -1.28017690e+03,
+             1.35069378e+03, -8.21269113e+02,  2.61771464e+03,  4.54199778e+03,
+            -3.16334682e+02, -7.75353384e+02, -3.23513136e+03, -5.65101488e+02,
+             1.10994380e+03, -1.02501738e+01,  7.83317642e+02,  6.31985704e+02,
+             6.23173384e+03,  9.00157884e+03, -2.02629768e+03, -2.30540966e+03,
+             9.03447557e+02, -1.43330042e+03,  0.00000000e+00, -1.00686731e+02,
+             5.16181142e+03, -2.73882862e+03,  0.00000000e+00, -1.06043594e+03,
+            -2.44839426e+03,  5.68561219e+03, -8.79969830e+02,  4.78224990e+03,
+            -1.74797352e+03, -7.86468335e+02,  2.04933388e+03,  4.83686667e+02,
+             1.00651463e+04, -6.74399795e-10, -2.63847746e+03,  1.72588713e-10,
+            -5.84668624e+00,  1.39053179e-13,  2.70225645e+03,  8.51477832e+02,
+            -2.55911729e+02,  0.00000000e+00, -3.43064520e+02,  3.10610685e+02,
+            -4.28596861e+02,  0.00000000e+00, -8.59773878e+03,  0.00000000e+00,
+            -0.00000000e+00, -3.62272703e+02,  1.39231725e+02,  0.00000000e+00,
+            -4.22313485e+03,  8.57984583e+03,  3.36751087e+03, -3.45132371e+03,
+            -4.19119813e+02,  0.00000000e+00,  5.41079843e+03, -1.22583604e+03,
+             3.19319270e+01, -1.62855595e+03,  1.14615338e+03, -3.16915393e+03,
+             0.00000000e+00, -1.23334201e+03,  2.44569676e+02, -7.60674607e+02,
+             1.50089954e+03]))
 
 
 
@@ -1428,14 +1020,14 @@ warnings.filterwarnings("ignore")
 regression(lasso_reg)
 ```
 
-    1404.4475906833827
-    10093.5 13080.99375
+    1385.0792031708206
+    10221.5 13115.975
     
     Cross-Validation: 
-    Scores: [2146.62952413 2257.74147102 3485.98406301 7677.95860781 2171.23714704
-     2564.99208972 3090.15667532 1856.36333816 2167.64427577 3530.41289889] 
-    Mean:  3094.912009086437 
-    Std:  1627.1093979201144
+    Scores: [4007.26185394 1577.45870912 2343.89993292 2242.93621081 3182.14480639
+     1789.49331146 6165.78902402 3758.29037517 2645.72305104 3227.32687165] 
+    Mean:  3094.0324146522294 
+    Std:  1273.8253165095277
 
 
 
@@ -1461,26 +1053,26 @@ elastic_net.intercept_,elastic_net.coef_
 
 
 
-    (16161.370549472054,
-     array([  241.74603064,  -332.39583052,   605.90145387,  -308.9497155 ,
-              759.13562371,   147.05586406,  1474.93441176,  2733.90393888,
-              -67.52737114,  -727.56707801,   272.18340977,  1626.46485703,
-              672.6860921 ,  -202.08496281,   439.85986008,    84.43294915,
-              330.55746746,  2153.3264593 ,   157.48644375,  -176.89257436,
-              -48.90286495,  -243.99835511,    68.94822777,   431.15985994,
-             1733.84129231,  -700.17132201,  -618.54290941,  -635.51083867,
-             -406.113938  ,  1273.77911618,  -224.96426424,   254.79348886,
-             -934.11651688, -1301.46124424,  -525.98626936,  -668.6638161 ,
-              248.23536053,  -248.23547588,  -203.22037765,   203.21975438,
-             -111.50257705,   111.50216606,  1410.21578428,   239.51711091,
-             -839.97803051,   -94.38656467,  -714.3670018 ,  -147.01191968,
-             -378.51073926,   526.5232855 , -1273.77883394,  1273.7787491 ,
-             -283.64671416,  -348.37039684,   761.76298502,   338.66149181,
-             -867.15794764,   398.74972502,  1412.49599126,    23.40990004,
-            -1979.06756024,   392.50915146,   286.14045878,  -537.23792495,
-              398.74969801,   -48.90290557,   197.3946511 ,   197.3611573 ,
-              248.2358796 ,  -197.19250851,   173.37131931,  -504.89436664,
-              -65.37225266]))
+    (15731.501912889555,
+     array([  245.29601148,  -311.10411684,   158.15383921,  -145.12612868,
+             1322.85427231,   357.75156163,  1111.85069338,  2710.18948875,
+              -83.77888908,  -732.00583715,   163.25574468,  1668.35550576,
+              626.48766291,     0.        ,   289.81055779,   139.75815629,
+              353.0810003 ,  2342.25935689,   208.59919461,  -256.60263319,
+               70.87680108,  -266.59535086,   -27.4209284 ,  -112.80699757,
+             1580.79228463,  -693.3568022 , -1032.48712571,  -477.52123457,
+             -436.72167019,  1313.1800964 ,  -227.84171368,   145.52013341,
+             -732.61143425, -1047.64294237,  -251.03018556,  -586.42809571,
+              212.6902467 ,  -212.69037461,  -356.76788477,   356.76769202,
+             -236.72690191,   236.72548826,  1291.53059091,   396.91767122,
+             -788.51841291,     3.26300098,  -904.19130669,  -102.97833282,
+             -678.0266149 ,   782.00517215, -1120.95027964,  1120.95025026,
+             -499.65149955,  -146.25285858,  1175.86536554,   387.33827524,
+            -1235.07675199,   317.77691524,  1487.68063702,  -159.64821548,
+            -1744.26468086,   232.90438055,   330.26799868,  -465.71738808,
+              317.77690255,   -25.67153272,   322.86347106,    32.8281067 ,
+              212.69123045,  -216.10318477,   238.79409585,  -463.83103763,
+             -101.56912239]))
 
 
 
@@ -1489,14 +1081,14 @@ elastic_net.intercept_,elastic_net.coef_
 regression(elastic_net)
 ```
 
-    2164.907772267349
-    10093.5 13080.99375
+    2123.5877514925514
+    10221.5 13115.975
     
     Cross-Validation: 
-    Scores: [1730.91363658 2057.17763975 1814.34549652 4821.62657427 2313.49422878
-     3079.06744452 3176.61112111 1880.1270179  3025.64909383 4069.54383412] 
-    Mean:  2796.855608738631 
-    Std:  985.8168414790156
+    Scores: [2661.77784715 1243.2805705  2584.66544031 1238.01777201 3609.03029072
+     2407.21383356 3770.0387057  2593.58865217 2271.12138878 4547.95646476] 
+    Mean:  2692.669096566312 
+    Std:  997.0403741859357
 
 
 ---------
@@ -1520,7 +1112,7 @@ final_rmse = np.sqrt(final_mse)
 print('RMSE: %.2f'%final_rmse)
 ```
 
-    RMSE: 1829.71
+    RMSE: 2001.66
 
 
 
@@ -1534,7 +1126,7 @@ np.sqrt(stats.t.interval(conf,len(sq_errors)-1,loc=sq_errors.mean(),scale=stats.
 
 
 
-    array([1273.88081542, 2252.31210263])
+    array([1256.92961089, 2536.41650078])
 
 
 
@@ -1551,4 +1143,4 @@ In this notebook, we were able to create a model to predict car prices base on i
 
 We verified that the Ridge regression performed best with the train set. Then, we evaluated this model using the test set we separeted during the data preparation.
 
-**We verify that the model had the same performance with the test set as with the train set. We have a 95% confidence that the RMSE will be between between 1273.9 and 2252.3, which is an accepbtable erros for such a simple model**. 
+**We verify that the model had the same performance with the test set as with the train set. We have a 95% confidence that the RMSE will be between between 1257.0 and 2236.4, which is an accepbtable erros for such a simple model**. 
