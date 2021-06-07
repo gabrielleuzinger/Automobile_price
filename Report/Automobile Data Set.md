@@ -489,11 +489,11 @@ Finally, we also try some nonlinear algorithms:
 2. Support Vector Regression (SVR). This model is an extension of the Support Vector Machines (SVM) developed for binary classification.
 3. k-Nearest Neighbors (KNN). This model "locates the k most similar instances in the training dataset for a new data instance" (BROWNLEE, 2016).
 
-The models are evaluated using the mean absolute error (MAE) and root square mean error (RMSE). RMSE punish larger errors more than smaller errors, inflating or magnifying the mean error score. This is due to the square of the error value. MAE does not give more or less weight to different types of errors and instead the scores increase linearly with increases in error. MAE is the simplest evaluation metric and most easily interpreted ([HALE, 2020](https://towardsdatascience.com/which-evaluation-metric-should-you-use-in-machine-learning-regression-problems-20cdaef258e); [BROWNLEE, 2021](https://machinelearningmastery.com/regression-metrics-for-machine-learning/)).
+The models are evaluated using the mean absolute error (MAE), root square mean error (RMSE), and R². RMSE punish larger errors more than smaller errors, inflating or magnifying the mean error score. This is due to the square of the error value. MAE does not give more or less weight to different types of errors and instead the scores increase linearly with increases in error. MAE is the simplest evaluation metric and most easily interpreted. R² tells you how much variance your model accounts for. In the case of the MAE and RMSE, the lower the better. But for R², the close the value is to 1, the better ([HALE, 2020](https://towardsdatascience.com/which-evaluation-metric-should-you-use-in-machine-learning-regression-problems-20cdaef258e); [BROWNLEE, 2021](https://machinelearningmastery.com/regression-metrics-for-machine-learning/)).
 
 Besides, "the key to a fair comparison of machine learning algorithms is ensuring that each algorithm is evaluated in the same way on the same data. You can achieve this by forcing each algorithm to be evaluated on a consistent test harness" (BROWNLEE, 2016). In this project, we do this by using the same split in the cross validation. We use the KFold function from the sklearn library with a random value rs as the random_satate parameter. Although the rs value change everytime the notebook is run, once it is set, the same rs value is used in all the models. This guarantees that all the models are evaluated on the same data.
 
-The result of the tests of the models with the training data show that **the CART is the best model**. It has the lowest MAE and RMSE.
+The result of the tests of the models with the training data show that **the CART is the best model**. It has the lowest MAE and RMSE, and the highest R².
 
 However, differing scales of the raw data may be negatively impacting the performance of some of the models. Therefore, we test the models again, but this time we standardized the data set.
 
@@ -507,7 +507,7 @@ from sklearn.model_selection import KFold
 
 def estimator_cross_val (model,estimator,pipe,matriz,rs):
     pipe_ = pipe(estimator)
-    scoring = ['neg_mean_absolute_error', 'neg_root_mean_squared_error']
+    scoring = ['neg_mean_absolute_error', 'neg_root_mean_squared_error','r2']
     kfold = KFold(n_splits=10, random_state=rs,shuffle=True)
     scores = cross_validate(pipe_,car_X_train,car_y_train,cv=kfold,scoring=scoring)
     
@@ -519,7 +519,11 @@ def estimator_cross_val (model,estimator,pipe,matriz,rs):
     rmse_mean = rmse_scores.mean()
     rmse_std = rmse_scores.std()
     
-    results_ = [model,mae_mean,mae_std,rmse_mean,rmse_std]
+    r2_scores = scores.get('test_r2')
+    r2_mean = r2_scores.mean()
+    r2_std = r2_scores.std()
+    
+    results_ = [model,mae_mean,mae_std,rmse_mean,rmse_std,r2_mean,r2_std]
     results_ = pd.Series(results_, index = matriz.columns)
     results = matriz.append(results_,ignore_index=True)
     return results
@@ -539,7 +543,7 @@ from sklearn.svm import SVR
 import warnings
 
 rs = randrange(10000)
-matriz = pd.DataFrame(columns=['model','MAE_mean','MAE_std','RMSE_mean','RMSE_std'])
+matriz = pd.DataFrame(columns=['model','MAE_mean','MAE_std','RMSE_mean','RMSE_std','R2_mean','R2_std'])
 
 matriz = estimator_cross_val('Linear Regression',LinearRegression(),estimator_transf,matriz,rs)
 matriz = estimator_cross_val('Ridge Regression',Ridge(),estimator_transf,matriz,rs)
@@ -578,64 +582,80 @@ matriz
       <th>MAE_std</th>
       <th>RMSE_mean</th>
       <th>RMSE_std</th>
+      <th>R2_mean</th>
+      <th>R2_std</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
       <td>Linear Regression</td>
-      <td>2403.116376</td>
-      <td>441.157350</td>
-      <td>3268.857268</td>
-      <td>824.456687</td>
+      <td>2457.218091</td>
+      <td>735.789099</td>
+      <td>3257.364364</td>
+      <td>1083.388328</td>
+      <td>0.781495</td>
+      <td>0.108581</td>
     </tr>
     <tr>
       <th>1</th>
       <td>Ridge Regression</td>
-      <td>2390.520811</td>
-      <td>414.913015</td>
-      <td>3244.085625</td>
-      <td>768.385175</td>
+      <td>2461.716949</td>
+      <td>733.618904</td>
+      <td>3253.772862</td>
+      <td>1070.329305</td>
+      <td>0.781333</td>
+      <td>0.109197</td>
     </tr>
     <tr>
       <th>2</th>
       <td>Lasso</td>
-      <td>2403.065810</td>
-      <td>441.066071</td>
-      <td>3268.763125</td>
-      <td>824.207429</td>
+      <td>2457.299493</td>
+      <td>735.779031</td>
+      <td>3257.321193</td>
+      <td>1083.298084</td>
+      <td>0.781495</td>
+      <td>0.108587</td>
     </tr>
     <tr>
       <th>3</th>
       <td>Elastic Net</td>
-      <td>2369.170629</td>
-      <td>368.929932</td>
-      <td>3199.399124</td>
-      <td>665.182718</td>
+      <td>2471.843746</td>
+      <td>724.444913</td>
+      <td>3256.816528</td>
+      <td>1024.141119</td>
+      <td>0.778743</td>
+      <td>0.111676</td>
     </tr>
     <tr>
       <th>4</th>
       <td>KNN</td>
-      <td>2030.277500</td>
-      <td>655.869904</td>
-      <td>3144.075203</td>
-      <td>946.750557</td>
+      <td>2349.068750</td>
+      <td>875.036495</td>
+      <td>3671.345220</td>
+      <td>1497.256266</td>
+      <td>0.748218</td>
+      <td>0.087033</td>
     </tr>
     <tr>
       <th>5</th>
       <td>CART</td>
-      <td>1736.275000</td>
-      <td>543.044958</td>
-      <td>2353.658439</td>
-      <td>698.610918</td>
+      <td>1913.837500</td>
+      <td>557.120314</td>
+      <td>2748.389309</td>
+      <td>881.737102</td>
+      <td>0.839347</td>
+      <td>0.082578</td>
     </tr>
     <tr>
       <th>6</th>
       <td>SVR</td>
-      <td>5419.272130</td>
-      <td>1478.876285</td>
-      <td>7899.508262</td>
-      <td>2530.321373</td>
+      <td>5791.840419</td>
+      <td>2412.910367</td>
+      <td>8091.516323</td>
+      <td>3548.962322</td>
+      <td>-0.148211</td>
+      <td>0.164344</td>
     </tr>
   </tbody>
 </table>
@@ -645,7 +665,7 @@ matriz
 
 
 ```python
-matriz2 = pd.DataFrame(columns=['model','MAE_mean','MAE_std','RMSE_mean','RMSE_std'])
+matriz2 = pd.DataFrame(columns=['model','MAE_mean','MAE_std','RMSE_mean','RMSE_std','R2_mean','R2_std'])
 
 matriz2 = estimator_cross_val('Linear Regression',LinearRegression(),estimator_scaler,matriz2,rs)
 matriz2 = estimator_cross_val('Ridge Regression',Ridge(),estimator_scaler,matriz2,rs)
@@ -683,64 +703,80 @@ matriz2
       <th>MAE_std</th>
       <th>RMSE_mean</th>
       <th>RMSE_std</th>
+      <th>R2_mean</th>
+      <th>R2_std</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
       <td>Linear Regression</td>
-      <td>2403.116376</td>
-      <td>441.157350</td>
-      <td>3268.857268</td>
-      <td>824.456687</td>
+      <td>2457.218091</td>
+      <td>735.789099</td>
+      <td>3257.364364</td>
+      <td>1083.388328</td>
+      <td>0.781495</td>
+      <td>0.108581</td>
     </tr>
     <tr>
       <th>1</th>
       <td>Ridge Regression</td>
-      <td>2368.312324</td>
-      <td>476.539069</td>
-      <td>3236.154444</td>
-      <td>847.627508</td>
+      <td>2439.942017</td>
+      <td>737.054556</td>
+      <td>3239.611224</td>
+      <td>1084.018909</td>
+      <td>0.784880</td>
+      <td>0.106845</td>
     </tr>
     <tr>
       <th>2</th>
       <td>Lasso</td>
-      <td>2402.820834</td>
-      <td>441.432629</td>
-      <td>3268.737753</td>
-      <td>824.680075</td>
+      <td>2457.154044</td>
+      <td>735.683465</td>
+      <td>3257.183680</td>
+      <td>1083.306040</td>
+      <td>0.781522</td>
+      <td>0.108569</td>
     </tr>
     <tr>
       <th>3</th>
       <td>Elastic Net</td>
-      <td>2317.221346</td>
-      <td>504.913302</td>
-      <td>3188.935555</td>
-      <td>828.986312</td>
+      <td>2412.150627</td>
+      <td>753.706819</td>
+      <td>3230.329043</td>
+      <td>1069.710440</td>
+      <td>0.788541</td>
+      <td>0.102691</td>
     </tr>
     <tr>
       <th>4</th>
       <td>KNN</td>
-      <td>2206.910000</td>
-      <td>752.608974</td>
-      <td>3249.923401</td>
-      <td>1172.079984</td>
+      <td>2636.675000</td>
+      <td>1199.478722</td>
+      <td>3922.053347</td>
+      <td>2041.273038</td>
+      <td>0.710114</td>
+      <td>0.177122</td>
     </tr>
     <tr>
       <th>5</th>
       <td>CART</td>
-      <td>1785.084375</td>
-      <td>509.299840</td>
-      <td>2555.319119</td>
-      <td>907.515508</td>
+      <td>1978.418750</td>
+      <td>634.972604</td>
+      <td>2814.307308</td>
+      <td>944.475788</td>
+      <td>0.835203</td>
+      <td>0.088250</td>
     </tr>
     <tr>
       <th>6</th>
       <td>SVR</td>
-      <td>5410.848841</td>
-      <td>1478.345879</td>
-      <td>7891.728383</td>
-      <td>2530.981299</td>
+      <td>5780.611127</td>
+      <td>2412.470318</td>
+      <td>8081.503511</td>
+      <td>3549.062777</td>
+      <td>-0.145053</td>
+      <td>0.164931</td>
     </tr>
   </tbody>
 </table>
@@ -758,7 +794,7 @@ We see that the model performs as expected with the test set. We verify that MAE
 
 
 ```python
-from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 pipe = estimator_scaler(DecisionTreeRegressor())
 pipe.fit(car_X_train,car_y_train)
@@ -767,11 +803,13 @@ car_y_hat = pipe.predict(car_X_test)
 final_mae = mean_absolute_error(car_y_test,car_y_hat)
 final_mse = mean_squared_error(car_y_test,car_y_hat)
 final_rmse = np.sqrt(final_mse)
-print('MAE:  %.2f'%final_mae,'\nRMSE: %.2f'%final_rmse)
+final_r2 = r2_score(car_y_test,car_y_hat)
+print('MAE:  %.2f'%final_mae,'\nRMSE: %.2f'%final_rmse,'\nR2:   %.2f'%final_r2)
 ```
 
-    MAE:  1972.80 
-    RMSE: 2933.36
+    MAE:  1483.10 
+    RMSE: 2108.05 
+    R2:   0.88
 
 
 ----------------------
@@ -782,4 +820,4 @@ In this notebook, we were able to create a model to predict car prices base on i
 
 We verified that the CART model performed best with the train set. Then, we evaluated this model using the test set we separeted during the data preparation.
 
-**We verify that the model had the same performance with the test set as with the train set. Moreover, the values of the MAE and RMSE are accepbtable for this kind of prediction**. 
+**We verify that the model had the same performance with the test set as with the train set. Moreover, the values of the MAE and RMSE are accepbtable for this kind of prediction and the R² is great**. 
