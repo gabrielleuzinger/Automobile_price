@@ -343,11 +343,9 @@ df_data.info()
 
 A "quick way to get a feel of the type of data you are dealing with is to plot a histogram for each numerical attribute" (GÉRON, 2019).
 
-**For this initial exploration, we are only considering continous values. Categorical values will be examined later**.
-
 Therefore, we will start our analysis making some histograms that are useful for understanding the dataset. We see that some histograms are tail-heavy: they extend much farther to the right of the median than to the left. Besides, only few attributes seems to have a normal distribution.
 
-Next, we can look to which attributes have the higher correlation with the price. First, we create a correlation matrix. Then, we make some scatter plots and a heatmap to vizualaize the correlations. **We can see that the varibales that have the stronger postive correlations with the car price are the engine size, curb weight, horsepower, and with. Besides, city mpg and highway mpg have a strong negative correlation with the price**.
+Next, we can look to which attributes have the higher correlation with the price. First, we create a correlation matrix. Then, we make some scatter plots and a heatmap to vizualaize the correlations. **We can see that the varibales that have the stronger postive correlations with the car price are the engine size, curb weight, horsepower, and width. Besides, city mpg and highway mpg have a strong negative correlation with the price**.
 
 
 ```python
@@ -479,8 +477,8 @@ We start with Linear Regression (LR) model. "A regression model, such as linear 
 
 Then, we can try some regularized linear models. This kind of model constrain the weights of the model, avoiding overfitting (GÉRON, 2019). We try three regularized linear models [(BROWNLEE, 2016)](https://machinelearningmastery.com/machine-learning-with-python/):
 
-1. Ridge regression. This model assumes that the input variables have a Gaussian distribution, that input variables are relevant to the output variable, and that they are not highly correlated with each other.
-2. Lasso regression. This model is a modification of the LR model,"where the loss function is modified to minimize the complexity of the model measured as the sum absolute value of the coefficient values" (BROWNLEE, 2016).
+1. Ridge regression. This model model uses the L2 regularization. It adds “squared magnitude” of coefficient as a penalty term to the loss function [(NAGPAL, 2017)](https://towardsdatascience.com/l1-and-l2-regularization-methods-ce25e7fc831c).
+2. Lasso regression. This model model uses the L1 regularization. It adds “absolute value of magnitude” of coefficient as penalty term to the loss function (NAGPAL, 2017).
 3. Elastic Net. This model combines the Ridge and the Lasso models. "It seeks to minimize the complexity of the regression model (magnitude and number of regression coefficients) by penalizing the model using both the L2-norm (sum squared coefficient values) and the L1-norm (sum absolute coefficient values)" (BROWNLEE, 2016).
 
 Finally, we also try some nonlinear algorithms:
